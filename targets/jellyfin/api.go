@@ -80,7 +80,6 @@ type library struct {
 	Name string
 	Path string
 }
-
 func (c apiClient) Libraries() ([]library, error) {
 	// create request
 	reqURL := autoscan.JoinURL(c.baseURL, "Library", "PhysicalPaths")
@@ -98,32 +97,25 @@ func (c apiClient) Libraries() ([]library, error) {
 	defer res.Body.Close()
 
 	// decode response
-	type Response struct {
-		Name      string   `json:"Name"`
-		Locations []string `json:"Locations"`
-	}
-
-	resp := make([]Response, 0)
-	if err := json.NewDecoder(res.Body).Decode(&resp); err != nil {
+	var paths []string
+	if err := json.NewDecoder(res.Body).Decode(&paths); err != nil {
 		return nil, fmt.Errorf("failed decoding libraries request response: %v: %w", err, autoscan.ErrFatal)
 	}
 
 	// process response
 	libraries := make([]library, 0)
-	for _, lib := range resp {
-		for _, folder := range lib.Locations {
-			libPath := folder
+	for _, path := range paths {
+		libPath := path
 
-			// Add trailing slash if there is none.
-			if len(libPath) > 0 && libPath[len(libPath)-1] != '/' {
-				libPath += "/"
-			}
-
-			libraries = append(libraries, library{
-				Name: lib.Name,
-				Path: libPath,
-			})
+		// Add trailing slash if there is none.
+		if len(libPath) > 0 && libPath[len(libPath)-1] != '/' {
+			libPath += "/"
 		}
+
+		libraries = append(libraries, library{
+			Name: "", // Name is unknown in the new format, so it remains empty
+			Path: libPath,
+		})
 	}
 
 	return libraries, nil
