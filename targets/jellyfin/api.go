@@ -83,7 +83,7 @@ type library struct {
 
 func (c apiClient) Libraries() ([]library, error) {
 	// create request
-	reqURL := autoscan.JoinURL(c.baseURL, "Library", "VirtualFolders")
+	reqURL := autoscan.JoinURL(c.baseURL, "Library", "PhysicalPaths")
 	req, err := http.NewRequest("GET", reqURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed creating libraries request: %v: %w", err, autoscan.ErrFatal)
